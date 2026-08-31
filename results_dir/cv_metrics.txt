@@ -1,0 +1,4 @@
+--- 5-Fold Cross-Validation Performance ---
+ROC-AUC:  0.6992 ± 0.1155
+Accuracy: 0.6597 ± 0.0593
+F1-Score: 0.6643 ± 0.0648

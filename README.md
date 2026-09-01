@@ -47,7 +47,7 @@ python collapse_kegg.py --input your_sample_KO.tsv --output your_sample_pathways
 Step 2: Apply Centered Log-Ratio (CLR) TransformationTo eliminate relative abundance constraints ($p \gg n$ compositionality), apply a Centered Log-Ratio (CLR) transformation across the full pathway profile:
 
 ```math
-\text{CLR}(x_i) = \ln\left(\frac{x_i}{g(\mathbf{x})}\right)
+$\text{CLR}(x_i) = \ln\left(\frac{x_i}{g(\mathbf{x})}\right)$
 ```
 
 ⚠️ Critical Requirement: CLR must be calculated on the entire background pathway table before filtering down to selected features. Calculating CLR on a subset of features distorts the sample's geometric mean $g(\mathbf{x})$ and produces invalid model inputs.

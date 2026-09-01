@@ -48,7 +48,7 @@ Step 2: Apply Centered Log-Ratio (CLR) TransformationTo eliminate relative abund
 
 ```math
 \text{CLR}(x_i) = \ln\left(\frac{x_i}{g(\mathbf{x})}\right)
-```math
+```
 
 ⚠️ Critical Requirement: CLR must be calculated on the entire background pathway table before filtering down to selected features. Calculating CLR on a subset of features distorts the sample's geometric mean $g(\mathbf{x})$ and produces invalid model inputs.
 

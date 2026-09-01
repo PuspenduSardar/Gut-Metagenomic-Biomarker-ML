@@ -8,12 +8,10 @@ An end-to-end machine learning pipeline and interactive web application for pred
 
 ---
 
-
----
-
 ## 📌 Overview
 
 This repository hosts the interactive deployment interface for our metagenomic biomarker discovery pipeline. The application allows researchers and clinical data scientists to:
+
 1. **Explore Model Performance:** Review cross-validation metrics and external validation performance ($N=56$ unseen validation cohort) obtained using a leak-free XGBoost workflow.
 2. **Examine Biomarkers:** Analyze top functional KEGG pathways prioritized using SHAP (SHapley Additive exPlanations) feature directionality.
 3. **Simulate Clinical Predictions:** Run real-time single-sample inference using custom patient data or a pre-loaded validation demo sample.
@@ -31,42 +29,65 @@ This repository hosts the interactive deployment interface for our metagenomic b
 ├── results_dir/           # Trained XGBoost model, selected features, & metric visual outputs
 ├── LICENSE                # MIT License
 └── README.md              # Project documentation
-
-
-🧪 Data Preparation Workflow for External Inputs
-To test custom patient samples on the Interactive Predictor tab, input data must undergo specific preprocessing steps to match the model's training distribution.
-
-[Raw KO Counts] ──> 1. Collapse to Pathways ──> 2. Full-Profile CLR Transform ──> 3. Upload CSV/TSV
-
-
-Step 1: Aggregate KOs to KEGG Pathways
-Convert raw KEGG Ortholog (KO) abundance matrices into pathway-level abundances using the provided script:
-
-python collapse_kegg.py --input your_sample_KO.tsv --output your_sample_pathways.tsv
-
-Step 2: Apply Centered Log-Ratio (CLR) TransformationTo eliminate relative abundance constraints ($p \gg n$ compositionality), apply a Centered Log-Ratio (CLR) transformation across the full pathway profile:
-
-```math
-$\text{CLR}(x_i) = \ln\left(\frac{x_i}{g(\mathbf{x})}\right)$
 ```
 
-⚠️ Critical Requirement: CLR must be calculated on the entire background pathway table before filtering down to selected features. Calculating CLR on a subset of features distorts the sample's geometric mean $g(\mathbf{x})$ and produces invalid model inputs.
+## 🧪 Data Preparation Workflow for External Inputs
 
-Step 3: Single-Sample Upload
+To test custom patient samples on the Interactive Predictor tab, input data must undergo specific preprocessing steps to match the model's training distribution.
+
+```text
+[Raw KO Counts] ──> 1. Collapse to Pathways ──> 2. Full-Profile CLR Transform ──> 3. Upload CSV/TSV
+```
+
+### Step 1: Aggregate KOs to KEGG Pathways
+
+Convert raw KEGG Ortholog (KO) abundance matrices into pathway-level abundances using the provided script:
+
+```bash
+python collapse_kegg.py --input your_sample_KO.tsv --output your_sample_pathways.tsv
+```
+
+### Step 2: Apply Centered Log-Ratio (CLR) Transformation
+
+To eliminate relative abundance constraints ($p \gg n$ compositionality), apply a Centered Log-Ratio (CLR) transformation across the full pathway profile:
+
+$$
+\operatorname{CLR}(x_i) = \ln\left(\frac{x_i}{g(\mathbf{x})}\right)
+$$
+
+> ⚠️ **Critical Requirement:** CLR must be calculated on the entire background pathway table before filtering down to selected features. Calculating CLR on a subset of features distorts the sample's geometric mean $g(\mathbf{x})$ and produces invalid model inputs.
+
+### Step 3: Single-Sample Upload
+
 Upload the CLR-transformed file (CSV/TSV) containing pathway features (rows or columns). The app automatically extracts the required 15 pathway signatures, sets missing background features to zero, and outputs a disease probability score.
 
-🚀 Running the Web App Locally
+---
+
+## 🚀 Running the Web App Locally
+
 If you prefer running the dashboard on your local machine:
 
-1. Clone the repository:
-git clone [https://github.com/PuspenduSardar/Gut-Metagenomic-Biomarker-ML.git](https://github.com/PuspenduSardar/Gut-Metagenomic-Biomarker-ML.git)
-cd Gut-Metagenomic-Biomarker-ML
+1. **Clone the repository:**
 
-2. Install dependencies:
-pip install -r requirements.txt
+   ```bash
+   git clone [https://github.com/PuspenduSardar/Gut-Metagenomic-Biomarker-ML.git](https://github.com/PuspenduSardar/Gut-Metagenomic-Biomarker-ML.git)
+   cd Gut-Metagenomic-Biomarker-ML
+   ```
 
-3. Launch Streamlit:
-streamlit run app.py
+2. **Install dependencies:**
 
-📄 License
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Launch Streamlit:**
+
+   ```bash
+   streamlit run app.py
+   ```
+
+---
+
+## 📄 License
+
 Distributed under the MIT License. See LICENSE for more information.

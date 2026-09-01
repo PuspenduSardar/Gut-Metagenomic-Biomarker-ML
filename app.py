@@ -1,5 +1,6 @@
 import json
 import os
+import joblib
 import pandas as pd
 import streamlit as st
 from xgboost import XGBClassifier
@@ -68,6 +69,7 @@ elif page == "Interactive Predictor":
 
     model_path = os.path.join(OUTPUT_DIR, "xgboost_model.json")
     feat_path = os.path.join(OUTPUT_DIR, "selected_features.json")
+    scaler_path = os.path.join(OUTPUT_DIR, "scaler.joblib")
     demo_path = os.path.join(OUTPUT_DIR, "demo_sample.json")
 
     if os.path.exists(model_path) and os.path.exists(feat_path):
@@ -76,6 +78,8 @@ elif page == "Interactive Predictor":
 
         with open(feat_path) as f:
             selected_features = json.load(f)
+
+        scaler = joblib.load(scaler_path) if os.path.exists(scaler_path) else None
 
         st.subheader("Choose Input Method")
         input_mode = st.radio(
@@ -87,27 +91,42 @@ elif page == "Interactive Predictor":
 
         if input_mode == "Use Demo Sample" and os.path.exists(demo_path):
             sample_df = pd.read_json(demo_path)
-            st.success("Loaded pre-formatted demo sample from validation cohort.")
+            st.success("Loaded pre-formatted CLR demo sample from validation cohort.")
 
         elif input_mode == "Upload Custom CSV/TSV":
             uploaded_file = st.file_uploader(
-                "Upload TSV/CSV file (Rows = Pathways, Columns = Abundance)",
+                "Upload CLR-transformed TSV/CSV file",
                 type=["tsv", "csv", "txt"],
             )
             if uploaded_file:
-                sep = "\t" if uploaded_file.name.endswith(".tsv") else ","
-                user_df = pd.read_csv(uploaded_file, sep=sep, index_col=0).T
+                sep = "\t" if uploaded_file.name.endswith(".tsv") or uploaded_file.name.endswith(".txt") else ","
+                user_df = pd.read_csv(uploaded_file, sep=sep, index_col=0)
+                
+                # Transpose if pathways are in rows instead of columns
+                if not any(feat in user_df.columns for feat in selected_features):
+                    user_df = user_df.T
+                
                 sample_df = user_df.reindex(
                     columns=selected_features, fill_value=0
-                )
+                ).iloc[0:1]
 
         if sample_df is not None:
-            st.subheader("Input Feature Abundances")
+            st.subheader("Input CLR Feature Abundances (Unscaled)")
             st.dataframe(sample_df, use_container_width=True)
 
             if st.button("🚀 Run Prediction"):
-                prob = clf.predict_proba(sample_df)[0][1]
-                pred_class = clf.predict(sample_df)[0]
+                # Apply Discovery cohort Z-score scaling before prediction
+                if scaler is not None:
+                    sample_scaled = pd.DataFrame(
+                        scaler.transform(sample_df),
+                        columns=selected_features,
+                        index=sample_df.index,
+                    )
+                else:
+                    sample_scaled = sample_df
+
+                prob = clf.predict_proba(sample_scaled)[0][1]
+                pred_class = clf.predict(sample_scaled)[0]
 
                 st.subheader("Prediction Result")
                 col1, col2 = st.columns(2)
@@ -125,5 +144,5 @@ elif page == "Interactive Predictor":
                     st.progress(float(prob))
     else:
         st.warning(
-            "Model files not found. Please ensure results_dir/ contains xgboost_model.json."
+            "Model files not found. Please ensure results_dir/ contains xgboost_model.json and scaler.joblib."
         )

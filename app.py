@@ -1,6 +1,7 @@
 import json
 import os
 import joblib
+import numpy as np
 import pandas as pd
 import streamlit as st
 from xgboost import XGBClassifier
@@ -91,6 +92,8 @@ elif page == "Interactive Predictor":
 
         if input_mode == "Use Demo Sample" and os.path.exists(demo_path):
             sample_df = pd.read_json(demo_path)
+            # Ensure column order matches selected features
+            sample_df = sample_df.reindex(columns=selected_features)
             st.success("Loaded pre-formatted CLR demo sample from validation cohort.")
 
         elif input_mode == "Upload Custom CSV/TSV":
@@ -99,23 +102,42 @@ elif page == "Interactive Predictor":
                 type=["tsv", "csv", "txt"],
             )
             if uploaded_file:
-                sep = "\t" if uploaded_file.name.endswith(".tsv") or uploaded_file.name.endswith(".txt") else ","
+                sep = "\t" if uploaded_file.name.endswith((".tsv", ".txt")) else ","
                 user_df = pd.read_csv(uploaded_file, sep=sep, index_col=0)
-                
-                # Transpose if pathways are in rows instead of columns
+
+                # Clean header whitespace
+                user_df.columns = user_df.columns.astype(str).str.strip()
+                user_df.index = user_df.index.astype(str).str.strip()
+
+                # Detect matrix orientation (Pathways as rows vs columns)
                 if not any(feat in user_df.columns for feat in selected_features):
-                    user_df = user_df.T
-                
+                    if any(feat in user_df.index for feat in selected_features):
+                        user_df = user_df.T
+
+                # Reindex to extract 15 target features
                 sample_df = user_df.reindex(
                     columns=selected_features, fill_value=0
                 ).iloc[0:1]
+
+                # Check for feature matching
+                missing_feats = [
+                    f for f in selected_features if f not in user_df.columns
+                ]
+                if len(missing_feats) == len(selected_features):
+                    st.error(
+                        "⚠️ None of the required 15 pathway signatures were found in the uploaded file. Please verify feature names."
+                    )
+                elif missing_feats:
+                    st.warning(
+                        f"⚠️ {len(missing_feats)} missing pathway features were defaulted to 0.0."
+                    )
 
         if sample_df is not None:
             st.subheader("Input CLR Feature Abundances (Unscaled)")
             st.dataframe(sample_df, use_container_width=True)
 
             if st.button("🚀 Run Prediction"):
-                # Apply Discovery cohort Z-score scaling before prediction
+                # Apply Discovery Cohort Z-score Scaling before prediction
                 if scaler is not None:
                     sample_scaled = pd.DataFrame(
                         scaler.transform(sample_df),
@@ -124,6 +146,9 @@ elif page == "Interactive Predictor":
                     )
                 else:
                     sample_scaled = sample_df
+                    st.warning(
+                        "Scaler file not found. Running prediction on unscaled data."
+                    )
 
                 prob = clf.predict_proba(sample_scaled)[0][1]
                 pred_class = clf.predict(sample_scaled)[0]
@@ -133,15 +158,35 @@ elif page == "Interactive Predictor":
 
                 with col1:
                     if pred_class == 1:
-                        st.error("### Result: **Case (High Disease Risk)**")
+                        st.error("### Result: **Responder / Case (Class 1)**")
+                        st.caption(
+                            "High probability match to target disease/responder phenotype."
+                        )
                     else:
-                        st.success("### Result: **Control (Low Disease Risk)**")
+                        st.success("### Result: **Non-Responder / Control (Class 0)**")
+                        st.caption(
+                            "High probability match to baseline control phenotype."
+                        )
 
                 with col2:
                     st.metric(
                         label="Disease Probability Score", value=f"{prob:.1%}"
                     )
                     st.progress(float(prob))
+
+                # Diagnostic Inspector for Validation
+                with st.expander("🔍 Model Diagnostic & Feature Inspector"):
+                    st.markdown("**1. Scaled Z-Score Input to XGBoost Model**")
+                    st.dataframe(sample_scaled, use_container_width=True)
+
+                    st.markdown("**2. Summary Metrics**")
+                    st.write(f"- **Raw CLR Mean:** {sample_df.values.mean():.4f}")
+                    st.write(
+                        f"- **Z-Score Transformed Mean:** {sample_scaled.values.mean():.4f}"
+                    )
+                    st.write(
+                        f"- **Raw Model Output (Class 1 Probability):** {prob:.4f}"
+                    )
     else:
         st.warning(
             "Model files not found. Please ensure results_dir/ contains xgboost_model.json and scaler.joblib."

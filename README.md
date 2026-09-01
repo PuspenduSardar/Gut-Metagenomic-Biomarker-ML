@@ -70,7 +70,7 @@ If you prefer running the dashboard on your local machine:
 1. **Clone the repository:**
 
    ```bash
-   git clone [https://github.com/PuspenduSardar/Gut-Metagenomic-Biomarker-ML.git](https://github.com/PuspenduSardar/Gut-Metagenomic-Biomarker-ML.git)
+   git clone https://github.com/PuspenduSardar/Gut-Metagenomic-Biomarker-ML.git
    cd Gut-Metagenomic-Biomarker-ML
    ```
 

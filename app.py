@@ -12,7 +12,7 @@ st.set_page_config(
 
 st.title("🧬 Gut Metagenomic Biomarker & ML Explorer")
 st.markdown(
-    "Predicting disease state and identifying functional KEGG pathway biomarkers from gut microbiome profiles."
+    "# Predicting Immunotherapy response from gut microbiome profiles using KEGG pathway."
 )
 
 st.sidebar.header("Navigation")
@@ -65,7 +65,7 @@ elif page == "Biomarker Discovery":
 elif page == "Interactive Predictor":
     st.header("3. Single-Sample Prediction Simulator")
     st.markdown(
-        "Run real-time disease prediction on new, CLR-transformed pathway profiles using the trained XGBoost model."
+        "# Run real-time disease prediction on new, CLR-transformed pathway profiles using the trained XGBoost model."
     )
 
     model_path = os.path.join(OUTPUT_DIR, "xgboost_model.json")
@@ -158,12 +158,12 @@ elif page == "Interactive Predictor":
 
                 with col1:
                     if pred_class == 1:
-                        st.error("### Result: **Responder**")
+                        st.success("### Result: **Responder**")
                         st.caption(
                             "#### High probability match to responder phenotype."
                         )
                     else:
-                        st.success("### Result: **Non-Responder**")
+                        st.error("### Result: **Non-Responder**")
                         st.caption(
                             "#### High probability match to non-responding patients at the baseline."
                         )

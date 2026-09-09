@@ -36,7 +36,7 @@ if page == "Overview & Performance":
         roc_img = os.path.join(OUTPUT_DIR, "cv_roc_curve.png")
         if os.path.exists(roc_img):
             st.image(
-                roc_img, caption="#### Leak-Free 5-Fold Cross-Validation ROC Curve"
+                roc_img, caption="Leak-Free 5-Fold Cross-Validation ROC Curve"
             )
 
     with col2:

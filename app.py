@@ -12,7 +12,7 @@ st.set_page_config(
 
 st.title("🧬 Gut Metagenomic Biomarker & ML Explorer")
 st.markdown(
-    "# Predicting Immunotherapy response from gut microbiome profiles using KEGG pathway."
+    "Predicting Immunotherapy response from KEGG pathways from gut microbiome profile."
 )
 
 st.sidebar.header("Navigation")
@@ -36,7 +36,7 @@ if page == "Overview & Performance":
         roc_img = os.path.join(OUTPUT_DIR, "cv_roc_curve.png")
         if os.path.exists(roc_img):
             st.image(
-                roc_img, caption="Leak-Free 5-Fold Cross-Validation ROC Curve"
+                roc_img, caption="#### Leak-Free 5-Fold Cross-Validation ROC Curve"
             )
 
     with col2:
@@ -65,7 +65,7 @@ elif page == "Biomarker Discovery":
 elif page == "Interactive Predictor":
     st.header("3. Single-Sample Prediction Simulator")
     st.markdown(
-        "# Run real-time disease prediction on new, CLR-transformed pathway profiles using the trained XGBoost model."
+        "Run real-time disease prediction on new, CLR-transformed pathway profiles using the trained XGBoost model."
     )
 
     model_path = os.path.join(OUTPUT_DIR, "xgboost_model.json")

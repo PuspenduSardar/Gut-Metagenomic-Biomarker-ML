@@ -160,12 +160,12 @@ elif page == "Interactive Predictor":
                     if pred_class == 1:
                         st.error("### Result: **Responder**")
                         st.caption(
-                            "##High probability match to responder phenotype."
+                            "## High probability match to responder phenotype."
                         )
                     else:
                         st.success("### Result: **Non-Responder**")
                         st.caption(
-                            "##High probability match to non-responding patients at the baseline."
+                            "## High probability match to non-responding patients at the baseline."
                         )
 
                 with col2:

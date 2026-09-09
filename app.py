@@ -12,7 +12,7 @@ st.set_page_config(
 
 st.title("🧬 Gut Metagenomic Biomarker & ML Explorer")
 st.markdown(
-    "Predicting Immunotherapy response from KEGG pathways from gut microbiome profile."
+    "Predicting Immunotherapy response in melanoma patients from KEGG pathways from gut microbiome profile."
 )
 
 st.sidebar.header("Navigation")

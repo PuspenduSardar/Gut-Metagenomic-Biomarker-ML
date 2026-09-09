@@ -158,19 +158,19 @@ elif page == "Interactive Predictor":
 
                 with col1:
                     if pred_class == 1:
-                        st.error("### Result: **Responder / Case (Class 1)**")
+                        st.error("### Result: **Responder**")
                         st.caption(
-                            "High probability match to target disease/responder phenotype."
+                            "##High probability match to responder phenotype."
                         )
                     else:
-                        st.success("### Result: **Non-Responder / Control (Class 0)**")
+                        st.success("### Result: **Non-Responder**")
                         st.caption(
-                            "High probability match to baseline control phenotype."
+                            "##High probability match to non-responding patients at the baseline."
                         )
 
                 with col2:
                     st.metric(
-                        label="Disease Probability Score", value=f"{prob:.1%}"
+                        label="Response Probability Score", value=f"{prob:.1%}"
                     )
                     st.progress(float(prob))
 
